@@ -18,6 +18,7 @@ const corsOptions = {
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
+    "https://crm-app-sable.vercel.app",
   ], // Frontend URLs
   credentials: true,
 };
@@ -35,5 +36,15 @@ app.use("/api/users", userRoutes);
 app.get("/", (req, res) => res.send("Backend running"));
 
 const PORT = process.env.PORT || 4000;
-prisma.$connect().then(() => console.log("Database connected"));
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Improved database connection with error handling
+prisma
+  .$connect()
+  .then(() => {
+    console.log("Database connected");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((error) => {
+    console.error("Failed to connect to database:", error);
+    process.exit(1); // Exit the process if database connection fails
+  });
