@@ -8,8 +8,20 @@ const {
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
 
+// Helper function to check if prisma is available
+const isPrismaAvailable = () => {
+  return prisma && typeof prisma.user !== "undefined" && prisma.user !== null;
+};
+
 async function register(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { email, password, name, role, companyId } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: "Email and password required" });
@@ -69,6 +81,13 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: "Email & password required" });

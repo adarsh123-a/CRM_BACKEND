@@ -1,8 +1,22 @@
 const prisma = require("../config/prisma");
 
+// Helper function to check if prisma is available
+const isPrismaAvailable = () => {
+  return (
+    prisma && typeof prisma.company !== "undefined" && prisma.company !== null
+  );
+};
+
 // Create a new company
 async function createCompany(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { name, size } = req.body;
 
     // Validate required fields
@@ -33,6 +47,13 @@ async function createCompany(req, res) {
 // Get all companies
 async function getCompanies(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const companies = await prisma.company.findMany({
       include: {
         users: {
@@ -57,6 +78,13 @@ async function getCompanies(req, res) {
 // Get a single company by ID
 async function getCompanyById(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { id } = req.params;
     const companyId = parseInt(id);
 
@@ -93,6 +121,13 @@ async function getCompanyById(req, res) {
 // Update a company
 async function updateCompany(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { id } = req.params;
     const companyId = parseInt(id);
     const { name, size } = req.body;
@@ -134,6 +169,13 @@ async function updateCompany(req, res) {
 // Delete a company
 async function deleteCompany(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { id } = req.params;
     const companyId = parseInt(id);
 

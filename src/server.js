@@ -8,8 +8,9 @@ require("dotenv").config();
 let prisma;
 try {
   prisma = require("./config/prisma.js");
+  console.log("Prisma client loaded successfully");
 } catch (error) {
-  console.error("Failed to import Prisma client:", error);
+  console.error("Failed to import Prisma client:", error.message);
   console.log("Attempting to start server without database connection...");
   prisma = null;
 }
@@ -46,16 +47,25 @@ app.get("/", (req, res) => res.send("Backend running"));
 
 const PORT = process.env.PORT || 4000;
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  if (prisma) {
+    res.status(200).json({ status: "OK", database: "Connected" });
+  } else {
+    res.status(200).json({ status: "OK", database: "Not connected" });
+  }
+});
+
 // Start server with or without database connection
 if (prisma) {
   prisma
     .$connect()
     .then(() => {
-      console.log("Database connected");
+      console.log("Database connected successfully");
       app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
     })
     .catch((error) => {
-      console.error("Failed to connect to database:", error);
+      console.error("Database connection error:", error.message);
       console.log("Starting server without database connection...");
       app.listen(PORT, () =>
         console.log(`Server running on port ${PORT} (without database)`)

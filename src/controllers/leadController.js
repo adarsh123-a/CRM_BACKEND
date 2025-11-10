@@ -1,8 +1,20 @@
 const prisma = require("../config/prisma");
 
+// Helper function to check if prisma is available
+const isPrismaAvailable = () => {
+  return prisma && typeof prisma.lead !== "undefined" && prisma.lead !== null;
+};
+
 // Create lead
 async function createLead(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const {
       title,
       email,
@@ -19,11 +31,9 @@ async function createLead(req, res) {
     if (ownerId && ownerId !== req.user.id) {
       // Only admins and managers can assign leads to other users
       if (req.user.role !== "ADMIN" && req.user.role !== "MANAGER") {
-        return res
-          .status(403)
-          .json({
-            error: "Only admins and managers can assign leads to other users",
-          });
+        return res.status(403).json({
+          error: "Only admins and managers can assign leads to other users",
+        });
       }
 
       // Check if the assigned user belongs to the same company as the current user
@@ -39,11 +49,9 @@ async function createLead(req, res) {
       // If either user doesn't belong to a company, they must be the same user
       if (!req.user.companyId || !assignedUser.companyId) {
         if (req.user.id !== ownerId) {
-          return res
-            .status(403)
-            .json({
-              error: "Cannot assign lead to user from different company",
-            });
+          return res.status(403).json({
+            error: "Cannot assign lead to user from different company",
+          });
         }
       } else if (req.user.companyId !== assignedUser.companyId) {
         return res
@@ -74,6 +82,13 @@ async function createLead(req, res) {
 // Get leads (Admin/Manager: all, Sales Exec: own)
 async function getLeads(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const role = req.user.role;
     const userId = req.user.id;
 
@@ -117,6 +132,13 @@ async function getLeads(req, res) {
 // Get single lead with history
 async function getLeadById(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const leadId = parseInt(req.params.id, 10);
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
@@ -134,6 +156,13 @@ async function getLeadById(req, res) {
 // Update lead + log history
 async function updateLead(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const leadId = parseInt(req.params.id, 10);
 
     // Check if leadId is a valid number
@@ -190,6 +219,13 @@ async function updateLead(req, res) {
 // Delete lead (Admin/Manager only)
 async function deleteLead(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const leadId = parseInt(req.params.id, 10);
     await prisma.lead.delete({ where: { id: leadId } });
     res.json({ msg: "Lead deleted successfully" });

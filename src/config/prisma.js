@@ -1,11 +1,14 @@
 // Attempt to import Prisma Client
 try {
   const { PrismaClient } = require("@prisma/client");
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    log: ["query", "info", "warn", "error"],
+  });
   module.exports = prisma;
 } catch (error) {
   console.warn("Prisma Client not available, creating mock client");
-  
+  console.error("Prisma Client Error:", error.message);
+
   // Mock Prisma client for situations where Prisma isn't generated properly
   const mockPrisma = {
     $connect: async () => {
@@ -16,7 +19,6 @@ try {
       console.log("Mock Prisma: disconnect called");
       return Promise.resolve();
     },
-    // Add mock implementations for your models as needed
     user: {
       findMany: async () => [],
       findUnique: async () => null,
@@ -53,6 +55,6 @@ try {
       delete: async () => ({}),
     },
   };
-  
+
   module.exports = mockPrisma;
 }

@@ -1,8 +1,20 @@
 const prisma = require("../config/prisma");
 
+// Helper function to check if prisma is available
+const isPrismaAvailable = () => {
+  return prisma && typeof prisma.user !== "undefined" && prisma.user !== null;
+};
+
 // Assign user to company
 async function assignUserToCompany(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { userId, companyId } = req.body;
 
     // Check if company exists
@@ -36,6 +48,13 @@ async function assignUserToCompany(req, res) {
 // Get users by company ID
 async function getUsersByCompany(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { companyId } = req.params;
     const companyIntId = parseInt(companyId);
 
@@ -64,6 +83,13 @@ async function getUsersByCompany(req, res) {
 // Update user
 async function updateUser(req, res) {
   try {
+    // Check if database is available
+    if (!isPrismaAvailable()) {
+      return res
+        .status(503)
+        .json({ error: "Service unavailable. Database not connected." });
+    }
+
     const { userId } = req.params;
     const { name, email, role } = req.body;
 
