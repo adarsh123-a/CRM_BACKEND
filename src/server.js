@@ -1,9 +1,18 @@
 const express = require("express");
 const cors = require("cors");
-const prisma = require("./config/prisma.js");
 const helmet = require("helmet");
 const morgan = require("morgan");
 require("dotenv").config();
+
+// Try to import prisma, but handle if it fails
+let prisma;
+try {
+  prisma = require("./config/prisma.js");
+} catch (error) {
+  console.error("Failed to import Prisma client:", error);
+  console.log("Attempting to start server without database connection...");
+  prisma = null;
+}
 
 const authRoutes = require("./routes/auth.route");
 const leadRoutes = require("./routes/leadRoute");
@@ -37,14 +46,23 @@ app.get("/", (req, res) => res.send("Backend running"));
 
 const PORT = process.env.PORT || 4000;
 
-// Improved database connection with error handling
-prisma
-  .$connect()
-  .then(() => {
-    console.log("Database connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((error) => {
-    console.error("Failed to connect to database:", error);
-    process.exit(1); // Exit the process if database connection fails
-  });
+// Start server with or without database connection
+if (prisma) {
+  prisma
+    .$connect()
+    .then(() => {
+      console.log("Database connected");
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch((error) => {
+      console.error("Failed to connect to database:", error);
+      console.log("Starting server without database connection...");
+      app.listen(PORT, () =>
+        console.log(`Server running on port ${PORT} (without database)`)
+      );
+    });
+} else {
+  app.listen(PORT, () =>
+    console.log(`Server running on port ${PORT} (without database)`)
+  );
+}
