@@ -72,7 +72,7 @@ async function register(req, res) {
 
     res.status(201).json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("Register error:", err);
     if (err.code === "P2002")
       return res.status(409).json({ error: "Email already exists" });
     res.status(500).json({ error: "Server error" });
@@ -96,7 +96,7 @@ async function login(req, res) {
     try {
       await prisma.$queryRaw`SELECT 1`;
     } catch (dbErr) {
-      console.error("Database connection error", dbErr);
+      console.error("Database connection error during login", dbErr);
       return res
         .status(503)
         .json({ error: "Service unavailable. Database connection failed." });

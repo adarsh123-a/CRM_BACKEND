@@ -1,8 +1,34 @@
+// Log DATABASE_URL for debugging (without exposing sensitive information)
+console.log(
+  "Prisma config - DATABASE_URL:",
+  process.env.DATABASE_URL ? "Set" : "Not set"
+);
+if (process.env.DATABASE_URL) {
+  console.log(
+    "Prisma config - DATABASE_URL length:",
+    process.env.DATABASE_URL.length
+  );
+  // Log first 30 characters for debugging (without exposing credentials)
+  console.log(
+    "Prisma config - DATABASE_URL prefix:",
+    process.env.DATABASE_URL.substring(
+      0,
+      Math.min(30, process.env.DATABASE_URL.length)
+    )
+  );
+}
+
 // Attempt to import Prisma Client
 try {
   const { PrismaClient } = require("@prisma/client");
   const prisma = new PrismaClient({
-    log: ["query", "info", "warn", "error"],
+    log: ["info", "warn", "error"],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL || undefined,
+      },
+    },
+    errorFormat: "minimal",
   });
   module.exports = prisma;
 } catch (error) {

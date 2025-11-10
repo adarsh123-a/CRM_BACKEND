@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.js",
     "build": "npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "test:db": "node test-db-connection.js",
     "postinstall": "npx prisma generate || echo \"Prisma generation failed, continuing...\""
   },
   "keywords": [],
